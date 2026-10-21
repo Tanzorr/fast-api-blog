@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_db
+from dependencies import get_current_user
 from models import UserModel
 from schemas import User, UserOut
 from security import password_hash
@@ -15,6 +16,18 @@ def get_user_or_404(user_id: int, db: Session) -> UserModel:
     user = db.get(UserModel, user_id)
     if user is None:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+    return user
+
+
+def get_own_user_or_403(
+    user_id: int, current_user: UserModel, db: Session
+) -> UserModel:
+    # 404 first: a missing User is "not found", not "forbidden".
+    user = get_user_or_404(user_id, db)
+    if user.id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="You can change only your own account"
+        )
     return user
 
 
@@ -35,6 +48,12 @@ def get_users(db: Session = Depends(get_db)):
     return db.scalars(select(UserModel).order_by(UserModel.id)).all()
 
 
+# Must stay before "/{user_id}", or FastAPI reads "me" as an id and returns 422.
+@router.get("/me", response_model=UserOut)
+def get_me(current_user: UserModel = Depends(get_current_user)):
+    return current_user
+
+
 @router.get("/{user_id}", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     return get_user_or_404(user_id, db)
@@ -48,14 +67,23 @@ def create_user(user: User, db: Session = Depends(get_db)):
 
 
 @router.put("/{user_id}", response_model=UserOut)
-def update_user(user_id: int, user: User, db: Session = Depends(get_db)):
-    db_user = get_user_or_404(user_id, db)
+def update_user(
+    user_id: int,
+    user: User,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    db_user = get_own_user_or_403(user_id, current_user, db)
     db_user.email = user.email
     db_user.password = password_hash.hash(user.password)
     return commit_user(db_user, db)
 
 
 @router.delete("/{user_id}", status_code=204)
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db.delete(get_user_or_404(user_id, db))
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    db.delete(get_own_user_or_403(user_id, current_user, db))
     db.commit()

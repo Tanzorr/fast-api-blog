@@ -18,7 +18,7 @@ what changed. Today a new column in a model does nothing (ADR-005).
 | Idea | Docs |
 | :--- | :--- |
 | What a migration is; `alembic init`, `revision --autogenerate`, `upgrade` | [Alembic tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html) |
-| `env.py` with `Base.metadata` and settings from `database.py` | [Autogenerate](https://alembic.sqlalchemy.org/en/latest/autogenerate.html) |
+| `env.py` with `Base.metadata` and settings from `config.py` | [Autogenerate](https://alembic.sqlalchemy.org/en/latest/autogenerate.html) |
 
 ## Ontology Links
 

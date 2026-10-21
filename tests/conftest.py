@@ -5,7 +5,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, make_url, text
 from sqlalchemy.orm import Session, sessionmaker
 
-from database import Base, get_db, settings
+from config import settings
+from database import Base, get_db
 from main import app
 
 TEST_DB_NAME = f"{settings.postgres_db}_test"
@@ -55,9 +56,31 @@ def client(db: Session) -> Iterator[TestClient]:
     app.dependency_overrides.clear()
 
 
+def create_user(client: TestClient, email: str, password: str) -> dict:
+    response = client.post("/users", json={"email": email, "password": password})
+    assert response.status_code == 201
+    return {**response.json(), "password": password}
+
+
+def login(client: TestClient, email: str, password: str) -> dict:
+    """Log in and return the header that sends the token."""
+    form = {"username": email, "password": password}
+    response = client.post("/auth/login", data=form)
+    assert response.status_code == 200
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
 @pytest.fixture
 def new_user(client: TestClient) -> dict:
-    payload = {"email": "ann@example.com", "password": "secret-123"}
-    response = client.post("/users", json=payload)
-    assert response.status_code == 201
-    return {**response.json(), "password": payload["password"]}
+    return create_user(client, "ann@example.com", "secret-123")
+
+
+@pytest.fixture
+def other_user(client: TestClient) -> dict:
+    return create_user(client, "bob@example.com", "secret-456")
+
+
+@pytest.fixture
+def auth_headers(client: TestClient, new_user: dict) -> dict:
+    """The token header of new_user."""
+    return login(client, new_user["email"], new_user["password"])

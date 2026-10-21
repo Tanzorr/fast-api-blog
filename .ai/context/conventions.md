@@ -59,7 +59,7 @@ called `Article` or `Item`.
 
 - **Don't build SQL with f-strings.** Use the ORM, or `text()` with parameters.
 - **Don't return a model without `response_model`.**
-- **Don't read `os.environ` outside `database.py`** (ADR-003).
+- **Don't read `os.environ` outside `config.py`** (ADR-003).
 - **Don't put secrets in code or in `docker-compose.yml`.** Use `.env`.
 - **Don't leave `print()`, `breakpoint()` or code in comments** in a change.
 - **Don't add a package to solve a five-line problem.** Ask before you add any

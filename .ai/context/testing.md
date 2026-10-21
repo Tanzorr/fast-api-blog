@@ -22,7 +22,8 @@ Tests must use a **separate test database**, never the development database
 | `test_engine` | Once per run: creates `<POSTGRES_DB>_test` if missing, then its tables |
 | `db` | A session on the test database. After the test, every table is emptied |
 | `client` | A `TestClient`; `app.dependency_overrides[get_db]` returns `db` |
-| `new_user` | A saved User, with its plain `password` added to the dict |
+| `new_user`, `other_user` | A saved User, with its plain `password` added to the dict |
+| `auth_headers` | `{"Authorization": "Bearer <token>"}` for `new_user` |
 
 `TestClient(app)` is used **without** `with`, so `lifespan` does not run
 `create_all()` on the development database.
@@ -39,6 +40,14 @@ Each row needs at least one test. Tickets add new rows.
 | T-4 | A Post with a missing title or content → `422` | I-4 | done |
 | T-5 | `GET`, `PUT`, `DELETE` on an unknown id → `404` for posts and users (there is no `GET /posts/{id}`) | `TASK-001`, `TASK-002` | done |
 | T-6 | Create → get → update → delete works for posts and users | `TASK-001`, `TASK-002` | done |
+| T-7 | The right email and password → `200` and a token that decodes to the User's id | `TASK-006` | done |
+| T-8 | A wrong password → `401` | `TASK-006` | done |
+| T-9 | An unknown email → `401` with the **same** message as T-8 | `TASK-006` | done |
+| T-10 | `GET /users/me` with a token → the User; without a token → `401` | `TASK-006` | done |
+| T-11 | An expired token → `401` | `TASK-006` | done |
+| T-12 | A token signed with another secret → `401` | `TASK-006` | done |
+| T-13 | A token of a deleted User → `401` | `TASK-006` | done |
+| T-14 | `PUT` / `DELETE` a User without a token → `401`; another User → `403`; your own → `200` / `204` | I-5 | done |
 
 ## How to Write Tests
 
@@ -54,7 +63,8 @@ Each row needs at least one test. Tickets add new rows.
 
 ## Commands
 
-The database must run (`docker compose up -d`).
+The database must run (`docker compose up -d`), and `.env` must have
+`JWT_SECRET`.
 
 ```bash
 venv1/bin/pytest

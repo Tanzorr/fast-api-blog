@@ -8,6 +8,7 @@ when every point of its Definition of Done is true
 
 | ID | Title | Finished | Goal | Result |
 | :--- | :--- | :--- | :--- | :--- |
+| [TASK-006](TASK-006-login-jwt.md) | Let a User log in and get a token; protect User changes | 2026-10-21 | V-5 | `POST /auth/login` (JWT, 30 min), `GET /users/me`; `PUT` / `DELETE` own User only (I-5); 12 new tests |
 | [TASK-004](TASK-004-pytest-ruff.md) | Add pytest and ruff, and write the tests we must have | 2026-10-21 | V-3 | 10 tests (T-1 – T-6) on a separate test database; ruff clean |
 | [TASK-003](TASK-003-api-routers.md) | Split the endpoints into `APIRouter`s | 2026-10-21 | V-1 | `routers/posts.py`, `routers/users.py`, `schemas.py`, `security.py`; same URLs |
 | [TASK-002](TASK-002-user-crud.md) | Add User CRUD with password hashing | 2026-10-20 | V-5 | `/users` CRUD; Argon2 hash; duplicate email → `409` |

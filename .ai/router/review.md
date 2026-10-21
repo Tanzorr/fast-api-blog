@@ -37,7 +37,7 @@ Check a change before it is committed. Does it do what the project promised?
 - Would the test fail if someone broke the behaviour later?
 
 **Rules for code**
-- Type hints, names from the ontology, `os.environ` only in `database.py`.
+- Type hints, names from the ontology, `os.environ` only in `config.py`.
 - No `print()`, no `breakpoint()`, no code in comments.
 
 ## Report

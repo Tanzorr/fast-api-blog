@@ -12,6 +12,7 @@
 | SQLAlchemy | 2.1 | ORM: models, sessions, queries (ADR-004) |
 | psycopg | 3.3 | Lets Python talk to PostgreSQL |
 | pwdlib + argon2-cffi | 0.3 / 25.1 | Password hashing with Argon2 (ADR-006) |
+| PyJWT | 2.15 | Makes and checks access tokens (ADR-010) |
 | PostgreSQL | 17 | Database, runs in Docker (ADR-001) |
 | Docker Compose | v2 | Runs the database on your computer |
 | pytest | 9.1 | Runs the tests in `tests/` ([`testing.md`](testing.md)) |
@@ -32,7 +33,7 @@ today (`venv1/bin/pip list`).
 
 ## Environment Variables
 
-They are read only in [`database.py`](../../database.py) by the `Settings`
+They are read only in [`config.py`](../../config.py) by the `Settings`
 class, and nowhere else (ADR-003). The API and `docker-compose.yml` read the
 same `.env` file. Copy `.env.example` to `.env` to start.
 
@@ -43,6 +44,8 @@ same `.env` file. Copy `.env.example` to `.env` to start.
 | `POSTGRES_DB` | `fastapi` | Database name (required) |
 | `POSTGRES_HOST` | `localhost` | Where the API finds the database (default `localhost`) |
 | `POSTGRES_PORT` | `5432` | Database port on your computer (default `5432`) |
+| `JWT_SECRET` | 64 hex characters | Signs access tokens (required, 32 characters or more). Make it with `python3 -c "import secrets; print(secrets.token_hex(32))"` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | How long a token works (default `30`, ADR-013) |
 
 ## Commands
 

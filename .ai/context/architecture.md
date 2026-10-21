@@ -24,22 +24,26 @@ Models                    models.py
 Rule: **a layer may use only the layers below it.** A model never imports a
 router or a schema.
 
-Two files are shared by all layers:
+These files are shared by all layers:
 
 | File | What is in it |
 | :--- | :--- |
-| `database.py` | `Settings`, `engine`, `SessionLocal`, `Base`, `get_db()` |
-| `security.py` | `password_hash` (Argon2). Later: tokens (`TASK-006`) |
+| `config.py` | `Settings` and `settings` — the only place that reads env variables (ADR-003) |
+| `database.py` | `engine`, `SessionLocal`, `Base`, `get_db()` |
+| `security.py` | `password_hash` (Argon2), `DUMMY_HASH`, `create_access_token()`, `decode_access_token()` |
+| `dependencies.py` | `oauth2_scheme`, `get_current_user()` — used by routers with `Depends` |
 
 ## Project Files
 
 ```
 main.py          Creates the app, creates the tables, includes the routers
-database.py      Settings + database connection
+config.py        Settings from env variables
+database.py      Database connection
 models.py        SQLAlchemy models
 schemas.py       Pydantic schemas
-security.py      Password hashing
-routers/         One APIRouter for each idea: posts.py, users.py
+security.py      Password hashing, access tokens
+dependencies.py  get_current_user()
+routers/         One APIRouter for each idea: auth.py, posts.py, users.py
 tests/           pytest tests; conftest.py has the fixtures (testing.md)
 pyproject.toml   pytest and ruff settings
 ```
@@ -53,6 +57,7 @@ You must be able to find every ontology idea in the code.
 | User | `models.py` → `UserModel` (table `users`) | `User` (input), `UserOut` (output, no password — I-3) | `routers/users.py`, prefix `/users` |
 | Post | `models.py` → `PostModel` (table `posts`) | `Post` (input), `PostOut` (output) | `routers/posts.py`, prefix `/posts` |
 | Visitor | Not saved. A request without a token | — | — |
+| Access token | Not saved. A JWT made by `security.create_access_token()` | `Token` (output) | `routers/auth.py`, `POST /auth/login`; checked by `dependencies.get_current_user()` |
 
 ## Architecture Decision Records (ADRs)
 
@@ -71,11 +76,13 @@ One file, one `pip install`. Cost: a new install next month can get different
 versions and break. Fix it by pinning versions (`fastapi==0.148.0`); this needs
 a ticket.
 
-### ADR-003 — Settings from `pydantic-settings`, read only in `database.py`
-**2026-10-20 · Accepted**
+### ADR-003 — Settings from `pydantic-settings`, read only in `config.py`
+**2026-10-20 · Accepted · changed 2026-10-21 (TASK-006)**
 `Settings` checks types and fails with a clear error if a required variable is
-missing. Other code imports `settings`; it never reads `os.environ`. Cost: one
-dependency.
+missing or wrong (for example a `JWT_SECRET` shorter than 32 characters). Other
+code imports `settings`; it never reads `os.environ`. Cost: one dependency.
+Change: `Settings` moved from `database.py` to `config.py`, because the JWT
+settings are not about the database. Cost: one more file.
 
 ### ADR-004 — Sync SQLAlchemy 2.x with `Mapped[]` types
 **2026-10-20 · Accepted**
@@ -115,3 +122,29 @@ the same database as in real use). `conftest.py` creates it if it is missing.
 After each test, `TRUNCATE … RESTART IDENTITY CASCADE` empties every table, so
 ids start at 1 again. Cost: the Docker database must run for tests; `TRUNCATE`
 is slower than rolling back a transaction, but easier to understand.
+
+### ADR-010 — Access tokens are JWTs made with `PyJWT`, algorithm HS256
+**2026-10-21 · Accepted**
+The FastAPI docs use `PyJWT`; `python-jose` is not maintained. HS256 needs only
+one secret, `JWT_SECRET` from `.env`. Cost: one dependency. Every server that
+checks tokens must know the secret, and anyone with the secret can make a token
+for any User. Changing the secret logs out everybody.
+
+### ADR-011 — The token's `sub` is the User id, not the email
+**2026-10-21 · Accepted**
+The email can change (`PUT /users/{id}`); the id never changes. `sub` is saved
+as a string, because the JWT standard wants a string. Cost: none.
+
+### ADR-012 — Login uses `OAuth2PasswordRequestForm`
+**2026-10-21 · Accepted**
+`POST /auth/login` takes form data, the OAuth2 standard, so the **Authorize**
+button in `/docs` works. Wrong email and wrong password give the same `401`,
+and an unknown email is still checked against `DUMMY_HASH`, so the answer time
+does not show which emails exist. Cost: the form field is called `username`,
+but it holds the email.
+
+### ADR-013 — An access token lives 30 minutes
+**2026-10-21 · Accepted**
+`ACCESS_TOKEN_EXPIRE_MINUTES`, default 30. A stolen token stops working soon.
+Cost: the User logs in again after 30 minutes (no refresh tokens yet). A token
+still works after a password change or after logout, until it expires.

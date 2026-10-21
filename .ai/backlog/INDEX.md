@@ -10,7 +10,6 @@ New tickets use [`TEMPLATE.md`](TEMPLATE.md).
 | ID | Title | Status | Priority | Goal | Needs first |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | [TASK-005](TASK-005-alembic-migrations.md) | Replace `create_all()` with Alembic migrations | `planned` | P1 | V-3 | TASK-004 |
-| [TASK-006](TASK-006-login-jwt.md) | Let a User log in and get a token; protect User changes | `planned` | P1 | V-5 | TASK-004 |
 | [TASK-007](TASK-007-post-author.md) | Give every Post an author; only the author can change it | `planned` | P1 | V-5 | TASK-005, TASK-006 |
 
 ## Rules

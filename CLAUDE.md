@@ -90,14 +90,14 @@ archive.
 All the details: [`.ai/context/tools.md`](.ai/context/tools.md). Permissions
 that the computer enforces: [`.claude/settings.json`](.claude/settings.json).
 
-**Check your work** — run the command. Do not guess if it will pass. Until
-`TASK-004` is done there are no tests and no linter; the only check is a manual
-request to the running app (see [`testing.md`](.ai/context/testing.md)).
+**Check your work** — run the command. Do not guess if it will pass. Tests
+need the database and `JWT_SECRET` in `.env` (see
+[`testing.md`](.ai/context/testing.md)).
 
 ```bash
-venv1/bin/pytest                 # after TASK-004
-venv1/bin/ruff check .           # after TASK-004
-venv1/bin/ruff format --check .  # after TASK-004
+venv1/bin/pytest
+venv1/bin/ruff check .
+venv1/bin/ruff format --check .
 ```
 
 **Strict rules**
@@ -114,7 +114,8 @@ venv1/bin/ruff format --check .  # after TASK-004
 
 ## 6. WHERE WE ARE NOW
 
-`TASK-001` – `TASK-003` are finished: FastAPI with PostgreSQL in Docker, CRUD
-for Posts and Users, passwords hashed with Argon2, endpoints split into
-`APIRouter`s. **There are no tests, no migrations and no login yet.** The next
-ticket is `TASK-004` (pytest + ruff).
+`TASK-001` – `TASK-004` and `TASK-006` are finished: FastAPI with PostgreSQL
+in Docker, CRUD for Posts and Users, Argon2 passwords, `APIRouter`s, pytest +
+ruff, and login with JWT access tokens (only the User can change their own
+account). **There are no migrations yet, and Posts are not protected.** The next
+ticket is `TASK-005` (Alembic).

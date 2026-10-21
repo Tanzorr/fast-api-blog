@@ -11,6 +11,10 @@ line here is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-006: `POST /auth/login` returns an access token (JWT, 30 minutes).
+  `GET /users/me` returns the logged-in User. The **Authorize** button in
+  `/docs` works. New required setting: `JWT_SECRET` in `.env` (32 characters or
+  more).
 - TASK-004: Automated tests with pytest (`venv1/bin/pytest`) on a separate
   test database, and code checks with ruff. Settings are in `pyproject.toml`.
 - The `.ai/` folder with project knowledge: business value, ontology, context
@@ -27,6 +31,8 @@ line here is part of the Definition of Done in
   PostgreSQL 17 runs in Docker Compose. Settings come from `.env`.
 
 **Changed**
+- TASK-006: `PUT` and `DELETE /users/{user_id}` need a token: no token → `401`,
+  another User's account → `403`. Before, anyone could change any User.
 - TASK-003: Endpoints are split into `routers/posts.py` and `routers/users.py`.
   The URLs are the same. `/docs` groups them by topic.
 

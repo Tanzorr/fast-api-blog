@@ -3,5 +3,6 @@ sqlalchemy
 psycopg[binary]
 pydantic-settings
 pwdlib[argon2]
+pyjwt
 pytest
 ruff
