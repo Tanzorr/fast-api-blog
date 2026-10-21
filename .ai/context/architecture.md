@@ -40,6 +40,8 @@ models.py        SQLAlchemy models
 schemas.py       Pydantic schemas
 security.py      Password hashing
 routers/         One APIRouter for each idea: posts.py, users.py
+tests/           pytest tests; conftest.py has the fixtures (testing.md)
+pyproject.toml   pytest and ruff settings
 ```
 
 ## Where Each Idea Lives in Code
@@ -105,3 +107,11 @@ could both pass. Cost: any other `IntegrityError` on users also becomes `409`.
 **2026-10-21 · Accepted**
 Each router has a `prefix` and `tags`. `main.py` only includes them. A new idea
 means a new file and one `include_router` line. Cost: more files to open.
+
+### ADR-009 — Tests use a second PostgreSQL database, emptied after each test
+**2026-10-21 · Accepted**
+Tests run on `<POSTGRES_DB>_test` on the same server, not on SQLite (ADR-001:
+the same database as in real use). `conftest.py` creates it if it is missing.
+After each test, `TRUNCATE … RESTART IDENTITY CASCADE` empties every table, so
+ids start at 1 again. Cost: the Docker database must run for tests; `TRUNCATE`
+is slower than rolling back a transaction, but easier to understand.

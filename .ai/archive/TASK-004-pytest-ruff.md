@@ -2,7 +2,7 @@
 
 | Field | Value |
 | :--- | :--- |
-| **Status** | `planned` |
+| **Status** | `done` |
 | **Priority** | P0 (nothing else can start) |
 | **Value driver** | `V-3` from [`../business/VALUE.md`](../business/VALUE.md) |
 | **Needs first** | — |
@@ -30,14 +30,14 @@ clean. After this ticket, every other ticket can prove its result.
 
 ## Acceptance Criteria
 
-- [ ] AC-1 — `pytest` and `ruff` are in `requirements.txt` (ask first — new
+- [x] AC-1 — `pytest` and `ruff` are in `requirements.txt` (ask first — new
       dependencies).
-- [ ] AC-2 — `pyproject.toml` has pytest and ruff settings.
-- [ ] AC-3 — Tests use a separate test database; the development data is
+- [x] AC-2 — `pyproject.toml` has pytest and ruff settings.
+- [x] AC-3 — Tests use a separate test database; the development data is
       never changed.
-- [ ] AC-4 — Tests T-1 – T-6 from [`testing.md`](../context/testing.md) are
+- [x] AC-4 — Tests T-1 – T-6 from [`testing.md`](../context/testing.md) are
       written and pass. Their status there says `done`.
-- [ ] AC-5 — `ruff check .` and `ruff format --check .` show no problems.
+- [x] AC-5 — `ruff check .` and `ruff format --check .` show no problems.
 
 ## Not in This Ticket
 
@@ -45,3 +45,19 @@ clean. After this ticket, every other ticket can prove its result.
 | :--- | :--- |
 | CI (GitHub Actions) | A later ticket |
 | Migrations | `TASK-005` |
+
+---
+
+## Result
+
+**Finished on:** 2026-10-21
+**What was built:** `pyproject.toml`, `tests/conftest.py` (fixtures `test_engine`,
+`db`, `client`, `new_user`), `tests/test_users.py`, `tests/test_posts.py` —
+10 tests. ADR-009 (test database).
+**Changes from the plan:** ruff found one problem in old code (B904):
+`commit_user()` now raises the `409` with `from None`. `ruff format` changed
+the line breaks in `routers/users.py`. T-5 has no `GET /posts/{id}` test,
+because that endpoint does not exist.
+**Strict rules checked:** I-1 (T-1), I-2 (T-2), I-3 (T-3), I-4 (T-4) — by
+`pytest`, 10 passed.
+**New tickets created:** none.

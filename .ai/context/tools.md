@@ -38,9 +38,9 @@ rg -l 'Depends\(get_db\)'            # show which files, not which lines
 ## Checking
 
 ```bash
-venv1/bin/pytest                 # after TASK-004
-venv1/bin/ruff check .           # after TASK-004
-venv1/bin/ruff format --check .  # after TASK-004
+venv1/bin/pytest
+venv1/bin/ruff check .
+venv1/bin/ruff format --check .
 docker compose ps
 docker compose logs --tail=50 db
 ```

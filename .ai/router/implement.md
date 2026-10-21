@@ -21,8 +21,7 @@ Build what a ticket describes.
 5. **Explain the new FastAPI / Python ideas** you used, in a few words, with a
    docs link (CLAUDE.md §1).
 6. **Run the checks**: `pytest`, `ruff check`, `ruff format --check`
-   (after `TASK-004`; before it, a manual check — see
-   [`testing.md`](../context/testing.md)).
+   (see [`testing.md`](../context/testing.md)).
 7. **Update what the change made wrong** — the ontology, an ADR, a context file.
 8. **Finish**: move the ticket to [`../archive/`](../archive/INDEX.md) with a
    note about the result.

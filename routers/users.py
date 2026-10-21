@@ -23,7 +23,9 @@ def commit_user(user: UserModel, db: Session) -> UserModel:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=409, detail=f"Email {user.email} is already registered")
+        raise HTTPException(
+            status_code=409, detail=f"Email {user.email} is already registered"
+        ) from None
     db.refresh(user)
     return user
 

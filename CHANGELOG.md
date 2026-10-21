@@ -11,6 +11,8 @@ line here is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-004: Automated tests with pytest (`venv1/bin/pytest`) on a separate
+  test database, and code checks with ruff. Settings are in `pyproject.toml`.
 - The `.ai/` folder with project knowledge: business value, ontology, context
   files, modes for the agent, backlog and archive.
 - `CLAUDE.md` start page, with rules for the agent in a learning project.

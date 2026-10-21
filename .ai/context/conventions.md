@@ -7,7 +7,7 @@ the rule does not mention.
 ## Language and Style
 
 - **Python 3.12.** Every function has type hints.
-- **PEP 8**, checked by `ruff format` and `ruff check` (after `TASK-004`). Both
+- **PEP 8**, checked by `ruff format` and `ruff check`. Both
   must show no problems before you finish.
 - Use f-strings to build text; use `pathlib.Path` for file paths.
 - Use modern types: `list[int]`, `str | None` — not `List`, `Optional`.
@@ -85,7 +85,7 @@ called `Article` or `Item`.
 A ticket is finished only when all of this is true:
 
 1. The code follows the rules above; `ruff check` and `ruff format --check`
-   show no problems (after `TASK-004`).
+   show no problems.
 2. Tests cover the new behaviour, and also what happens when it fails.
 3. All `pytest` tests pass.
 4. Every strict rule (invariant) the change touches is still true. Write which

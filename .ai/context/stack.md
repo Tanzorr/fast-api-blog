@@ -14,8 +14,10 @@
 | pwdlib + argon2-cffi | 0.3 / 25.1 | Password hashing with Argon2 (ADR-006) |
 | PostgreSQL | 17 | Database, runs in Docker (ADR-001) |
 | Docker Compose | v2 | Runs the database on your computer |
+| pytest | 9.1 | Runs the tests in `tests/` ([`testing.md`](testing.md)) |
+| ruff | 0.17 | Linter and formatter; rules in `pyproject.toml` |
 
-Not installed yet: pytest, ruff (`TASK-004`), Alembic (`TASK-005`).
+Not installed yet: Alembic (`TASK-005`).
 
 The packages are listed in [`../../requirements.txt`](../../requirements.txt),
 **without exact versions** (ADR-002). The versions above are what `venv1` has
@@ -50,6 +52,9 @@ docker compose up -d                       # start the database
 python3 -m venv venv1                      # first time only
 venv1/bin/pip install -r requirements.txt  # first time, and after requirements change
 venv1/bin/fastapi dev main.py              # start the API with auto-restart
+venv1/bin/pytest                           # run the tests (the database must run)
+venv1/bin/ruff check .                     # find code problems
+venv1/bin/ruff format .                    # format the code
 docker compose logs -f db
 docker compose exec db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"  # SQL prompt
 ```

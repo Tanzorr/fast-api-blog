@@ -1,0 +1,15 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W: PEP 8 · F: Pyflakes (unused imports, unknown names) · I: import order
+# UP: modern Python syntax · B: common bugs
+select = ["E", "W", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI uses Depends() as a default value on purpose.
+extend-immutable-calls = ["fastapi.Depends"]

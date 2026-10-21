@@ -4,11 +4,7 @@ Tests prove two things: the strict rules (invariants) in
 [`ontology.md`](ontology.md) are true, and the behaviour a ticket promises
 works. A test that can never fail proves nothing.
 
-**Today there are no automated tests.** `TASK-004` adds pytest. Until then,
-check a change by hand: start the API and call the endpoints in `/docs`, or
-with FastAPI's `TestClient` in a short script.
-
-## Kinds of Tests (after `TASK-004`)
+## Kinds of Tests
 
 | Kind | What it uses | Use it for |
 | :--- | :--- | :--- |
@@ -18,8 +14,18 @@ with FastAPI's `TestClient` in a short script.
 For features, use **API tests** first. They test path → schema → model →
 database together. Most bugs in how the parts connect are found there.
 
-Tests must use a **separate test database**, never the development database.
-Replace `get_db` with `app.dependency_overrides[get_db]`.
+Tests must use a **separate test database**, never the development database
+(ADR-009). [`tests/conftest.py`](../../tests/conftest.py) does this:
+
+| Fixture | What it gives |
+| :--- | :--- |
+| `test_engine` | Once per run: creates `<POSTGRES_DB>_test` if missing, then its tables |
+| `db` | A session on the test database. After the test, every table is emptied |
+| `client` | A `TestClient`; `app.dependency_overrides[get_db]` returns `db` |
+| `new_user` | A saved User, with its plain `password` added to the dict |
+
+`TestClient(app)` is used **without** `with`, so `lifespan` does not run
+`create_all()` on the development database.
 
 ## Tests We Must Have
 
@@ -27,12 +33,12 @@ Each row needs at least one test. Tickets add new rows.
 
 | # | Behaviour | Proves | Status |
 | :--- | :--- | :--- | :--- |
-| T-1 | Creating a User with an email that is already used → `409` | I-1 | not written |
-| T-2 | The saved password is not the plain text, and `verify()` accepts the original | I-2 | not written |
-| T-3 | No `/users` response contains `password` | I-3 | not written |
-| T-4 | A Post with a missing title or content → `422` | I-4 | not written |
-| T-5 | `GET`, `PUT`, `DELETE` on an unknown id → `404` for posts and users | `TASK-001`, `TASK-002` | not written |
-| T-6 | Create → get → update → delete works for posts and users | `TASK-001`, `TASK-002` | not written |
+| T-1 | Creating a User with an email that is already used → `409` | I-1 | done |
+| T-2 | The saved password is not the plain text, and `verify()` accepts the original | I-2 | done |
+| T-3 | No `/users` response contains `password` | I-3 | done |
+| T-4 | A Post with a missing title or content → `422` | I-4 | done |
+| T-5 | `GET`, `PUT`, `DELETE` on an unknown id → `404` for posts and users (there is no `GET /posts/{id}`) | `TASK-001`, `TASK-002` | done |
+| T-6 | Create → get → update → delete works for posts and users | `TASK-001`, `TASK-002` | done |
 
 ## How to Write Tests
 
@@ -46,7 +52,9 @@ Each row needs at least one test. Tickets add new rows.
 - Code that depends on time: give the time to the code, or override it. Never
   use `time.sleep()`.
 
-## Commands (after `TASK-004`)
+## Commands
+
+The database must run (`docker compose up -d`).
 
 ```bash
 venv1/bin/pytest
