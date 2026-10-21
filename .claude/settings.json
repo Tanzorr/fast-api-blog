@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "default",
+
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(stat:*)",
+      "Bash(du:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git blame:*)",
+      "Bash(git grep:*)",
+      "Bash(git ls-files:*)",
+
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker compose config:*)",
+
+      "Bash(venv1/bin/pytest:*)",
+      "Bash(venv1/bin/ruff:*)",
+      "Bash(venv1/bin/pip list:*)",
+      "Bash(venv1/bin/pip show:*)",
+      "Bash(venv1/bin/alembic current:*)",
+      "Bash(venv1/bin/alembic history:*)",
+      "Bash(venv1/bin/alembic check:*)"
+    ],
+
+    "ask": [
+      "Bash(venv1/bin/pip install:*)",
+      "Bash(venv1/bin/pip uninstall:*)",
+      "Bash(venv1/bin/alembic upgrade:*)",
+      "Bash(venv1/bin/alembic downgrade:*)",
+      "Bash(venv1/bin/alembic revision:*)",
+      "Bash(venv1/bin/fastapi:*)",
+      "Bash(venv1/bin/uvicorn:*)",
+      "Bash(docker compose exec db psql:*)",
+
+      "Bash(docker compose up:*)",
+      "Bash(docker compose down:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose restart:*)",
+      "Bash(docker volume:*)",
+
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+
+      "Edit(./requirements.txt)",
+      "Edit(./docker-compose.yml)",
+      "Edit(./.env.example)",
+      "Edit(./.claude/settings.json)"
+    ],
+
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.*.local)",
+      "Read(./.env.production)",
+      "Read(./**/*.key)",
+      "Read(./**/*.pem)",
+      "Read(./**/id_rsa*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+
+      "Edit(./.env)",
+      "Edit(./venv1/**)",
+      "Edit(./.venv/**)",
+
+      "Bash(cat .env)",
+      "Bash(cat ./.env)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(docker compose down -v:*)",
+      "Bash(chmod 777:*)"
+    ]
+  }
+}
