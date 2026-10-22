@@ -31,12 +31,12 @@ These files are shared by all layers:
 | `config.py` | `Settings` and `settings` — the only place that reads env variables (ADR-003) |
 | `database.py` | `engine`, `SessionLocal`, `Base`, `get_db()` |
 | `security.py` | `password_hash` (Argon2), `DUMMY_HASH`, `create_access_token()`, `decode_access_token()` |
-| `dependencies.py` | `oauth2_scheme`, `get_current_user()` — used by routers with `Depends` |
+| `dependencies.py` | `oauth2_scheme`, `get_current_user()`, `get_pagination()` — used by routers with `Depends` |
 
 ## Project Files
 
 ```
-main.py          Creates the app, creates the tables, includes the routers
+main.py          Creates the app, includes the routers
 config.py        Settings from env variables
 database.py      Database connection
 models.py        SQLAlchemy models
@@ -45,6 +45,8 @@ security.py      Password hashing, access tokens
 dependencies.py  get_current_user()
 routers/         One APIRouter for each idea: auth.py, posts.py, users.py
 tests/           pytest tests; conftest.py has the fixtures (testing.md)
+alembic/         Migrations: env.py (connection), versions/ (one file per change)
+alembic.ini      Alembic settings; new migration files are formatted with ruff
 pyproject.toml   pytest and ruff settings
 ```
 
@@ -56,6 +58,7 @@ You must be able to find every ontology idea in the code.
 | :--- | :--- | :--- | :--- |
 | User | `models.py` → `UserModel` (table `users`) | `User` (input), `UserOut` (output, no password — I-3) | `routers/users.py`, prefix `/users` |
 | Post | `models.py` → `PostModel` (table `posts`) | `Post` (input), `PostOut` (output) | `routers/posts.py`, prefix `/posts` |
+| Like | `models.py` → table `post_likes` (no model class); `PostModel.liked_by`, `UserModel.liked_posts`, `PostModel.likes_count` | `PostOut.likes_count` | `routers/posts.py` → `/posts/{post_id}/likes`; `routers/users.py` → `/users/me/likes` |
 | Visitor | Not saved. A request without a token | — | — |
 | Access token | Not saved. A JWT made by `security.create_access_token()` | `Token` (output) | `routers/auth.py`, `POST /auth/login`; checked by `dependencies.get_current_user()` |
 
@@ -91,12 +94,18 @@ thread pool, so they do not block the server. The `Mapped[...]` style gives
 type hints for every column. Cost: async would handle more requests at the
 same time; we do not need that now.
 
-### ADR-005 — Tables are created with `create_all()` at startup, no migrations
-**2026-10-20 · Accepted — temporary**
-`Base.metadata.create_all()` in `lifespan` creates missing tables. It is the
-fastest start. Cost: it **never changes a table that already exists**. A new
-column in a model does nothing in the database. `TASK-005` replaces this with
-Alembic.
+### ADR-005 — Tables are created by Alembic migrations
+**2026-10-20 · Accepted · changed 2026-10-22 (TASK-005)**
+Every change to the tables is a migration file in `alembic/versions/`, kept in
+git. `alembic upgrade head` brings any database to the newest version.
+`alembic/env.py` takes the URL from `config.settings` (ADR-003) and compares
+the models (`Base.metadata`) with the database. Cost: one dependency
+(`alembic`), and one more step after each model change (`revision
+--autogenerate`, read the file, `upgrade`). The test database is still made with
+`create_all()` (ADR-009), so tests do not run the migrations; `alembic check`
+finds a model change without a migration.
+Before: `create_all()` in `lifespan` made missing tables at startup, but never
+changed a table that already existed.
 
 ### ADR-006 — Passwords hashed with Argon2 via `pwdlib`
 **2026-10-20 · Accepted**
@@ -148,3 +157,26 @@ but it holds the email.
 `ACCESS_TOKEN_EXPIRE_MINUTES`, default 30. A stolen token stops working soon.
 Cost: the User logs in again after 30 minutes (no refresh tokens yet). A token
 still works after a password change or after logout, until it expires.
+
+### ADR-014 — Likes: a plain association table; the count is a `column_property`
+**2026-10-22 · Accepted (TASK-008)**
+`post_likes` is a `Table`, not a model class, because a like has no data of its
+own. `relationship(secondary=post_likes)` gives `PostModel.liked_by` and
+`UserModel.liked_posts`. The primary key `(user_id, post_id)` stops a second
+like; the `IntegrityError` becomes `409`, like ADR-007. Both foreign keys have
+`ondelete="CASCADE"`. `PostModel.likes_count` is a `column_property` with a
+count subquery, so every Post query also loads the count: `GET /posts` is one
+query. Cost: every Post query runs the subquery, also where the count is not
+needed. To save data on a like (for example the date), the table must become
+a model class (an *association object*).
+
+### ADR-015 — Lists use `limit` / `offset`; the response stays a plain list
+**2026-10-22 · Accepted (TASK-009)**
+`get_pagination()` in `dependencies.py` checks `limit` (default 20, 1–100) and
+`offset` with `Query(ge=…, le=…)`; every list endpoint uses it with `Depends`.
+Rows are sorted by `id`, so pages never overlap. The Post filters are one
+query-parameter model, `schemas.PostFilters`; `routers/posts.filter_posts()`
+adds one `WHERE` for each filter that was sent. `search` uses `icontains(…,
+autoescape=True)` (`ILIKE`, and `%` / `_` are not wildcards). Cost: the client
+does not get the total number of rows; `offset` gets slow on very big tables
+(cursor pagination is faster, but harder); `ILIKE '%…%'` cannot use an index.

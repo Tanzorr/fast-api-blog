@@ -15,6 +15,7 @@ Posts.
 | :--- | :--- | :--- |
 | **User** | yes | A person with an account: an email and a password. A User logs in to get an access token. Later a User writes Posts (`TASK-007`). |
 | **Post** | yes | An article: a title, the text (content), and the date it was created. |
+| **Like** | yes | A User marks a Post as liked. Everyone sees how many likes a Post has. |
 | **Visitor** | no | Anyone who calls the API without logging in. |
 | **Access token** | no | A signed proof, given at login, that a request comes from one User. It stops working 30 minutes after login. |
 
@@ -22,10 +23,11 @@ Posts.
 
 ```
 User   --writes-->   Post   (one User, many Posts)  — planned, TASK-007
+User   --likes-->    Post   (many Users, many Posts)
 User   --gets-->     Access token   (at login; a User can have many at once)
 ```
 
-Today Posts and Users are not connected.
+When a Post or a User is deleted, its Likes are deleted too.
 
 ## 3. Strict Rules (Invariants)
 
@@ -38,6 +40,7 @@ Things that must always be true. If the code breaks one, it is a bug.
 | I-3 | The API never returns a password or a password hash. |
 | I-4 | Every Post has a title (255 characters or less) and content. |
 | I-5 | Only the User themself can change or delete their account. |
+| I-6 | A User likes one Post at most once. |
 
 ## 4. Open Questions
 

@@ -4,9 +4,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_db
-from dependencies import get_current_user
+from dependencies import get_current_user, get_pagination
 from models import UserModel
-from schemas import User, UserOut
+from schemas import Pagination, PostOut, User, UserOut
 from security import password_hash
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -44,14 +44,27 @@ def commit_user(user: UserModel, db: Session) -> UserModel:
 
 
 @router.get("", response_model=list[UserOut])
-def get_users(db: Session = Depends(get_db)):
-    return db.scalars(select(UserModel).order_by(UserModel.id)).all()
+def get_users(
+    pagination: Pagination = Depends(get_pagination), db: Session = Depends(get_db)
+):
+    query = (
+        select(UserModel)
+        .order_by(UserModel.id)
+        .limit(pagination.limit)
+        .offset(pagination.offset)
+    )
+    return db.scalars(query).all()
 
 
 # Must stay before "/{user_id}", or FastAPI reads "me" as an id and returns 422.
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: UserModel = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/me/likes", response_model=list[PostOut])
+def get_my_likes(current_user: UserModel = Depends(get_current_user)):
+    return current_user.liked_posts
 
 
 @router.get("/{user_id}", response_model=UserOut)

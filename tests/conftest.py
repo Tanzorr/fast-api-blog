@@ -1,8 +1,9 @@
 from collections.abc import Iterator
+from contextlib import contextmanager
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, make_url, text
+from sqlalchemy import Engine, create_engine, event, make_url, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from config import settings
@@ -50,10 +51,23 @@ def db(test_engine) -> Iterator[Session]:
 @pytest.fixture
 def client(db: Session) -> Iterator[TestClient]:
     app.dependency_overrides[get_db] = lambda: db
-    # Not `with TestClient(app)`: that runs lifespan, which would call
-    # create_all() on the development database.
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@contextmanager
+def count_queries(engine: Engine) -> Iterator[list[str]]:
+    """Collect every SQL statement that runs inside the `with` block."""
+    statements: list[str] = []
+
+    def collect(conn, cursor, statement, parameters, context, executemany) -> None:
+        statements.append(statement)
+
+    event.listen(engine, "before_cursor_execute", collect)
+    try:
+        yield statements
+    finally:
+        event.remove(engine, "before_cursor_execute", collect)
 
 
 def create_user(client: TestClient, email: str, password: str) -> dict:

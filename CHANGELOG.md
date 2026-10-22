@@ -11,6 +11,13 @@ line here is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-009: `GET /posts` and `GET /users` take `limit` and `offset`.
+  `GET /posts` also takes `search`, `created_after`, `created_before` and
+  `min_likes`. See the README.
+- TASK-008: Likes. `POST /posts/{post_id}/likes` likes a Post (a second like
+  → `409`), `DELETE /posts/{post_id}/likes` takes it back, and
+  `GET /users/me/likes` lists the Posts you liked. Every Post now has
+  `likes_count`. Run `venv1/bin/alembic upgrade head`.
 - TASK-006: `POST /auth/login` returns an access token (JWT, 30 minutes).
   `GET /users/me` returns the logged-in User. The **Authorize** button in
   `/docs` works. New required setting: `JWT_SECRET` in `.env` (32 characters or
@@ -31,6 +38,13 @@ line here is part of the Definition of Done in
   PostgreSQL 17 runs in Docker Compose. Settings come from `.env`.
 
 **Changed**
+- TASK-009: `GET /posts` and `GET /users` return at most 20 rows when you do
+  not send `limit`. Before, they returned every row. Use `offset` to get the
+  next page.
+- TASK-005: Tables are made by Alembic migrations, not at app start. After
+  `git pull`, run `venv1/bin/pip install -r requirements.txt` and
+  `venv1/bin/alembic upgrade head`. A database made before this change: run
+  `venv1/bin/alembic stamp head` once instead of `upgrade`.
 - TASK-006: `PUT` and `DELETE /users/{user_id}` need a token: no token → `401`,
   another User's account → `403`. Before, anyone could change any User.
 - TASK-003: Endpoints are split into `routers/posts.py` and `routers/users.py`.

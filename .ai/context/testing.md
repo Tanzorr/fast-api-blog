@@ -25,9 +25,6 @@ Tests must use a **separate test database**, never the development database
 | `new_user`, `other_user` | A saved User, with its plain `password` added to the dict |
 | `auth_headers` | `{"Authorization": "Bearer <token>"}` for `new_user` |
 
-`TestClient(app)` is used **without** `with`, so `lifespan` does not run
-`create_all()` on the development database.
-
 ## Tests We Must Have
 
 Each row needs at least one test. Tickets add new rows.
@@ -48,6 +45,17 @@ Each row needs at least one test. Tickets add new rows.
 | T-12 | A token signed with another secret → `401` | `TASK-006` | done |
 | T-13 | A token of a deleted User → `401` | `TASK-006` | done |
 | T-14 | `PUT` / `DELETE` a User without a token → `401`; another User → `403`; your own → `200` / `204` | I-5 | done |
+| T-15 | Like a Post → `201` with `likes_count`; no token → `401`; unknown Post → `404` | `TASK-008` | done |
+| T-16 | Like the same Post twice → `409`, still one like | I-6 | done |
+| T-17 | Unlike → `204`; not liked → `404`; no token → `401` | `TASK-008` | done |
+| T-18 | `GET /posts` shows the right `likes_count`; the number of queries does not grow with more Posts | `TASK-008` | done |
+| T-19 | `GET /users/me/likes` lists only liked Posts; no token → `401` | `TASK-008` | done |
+| T-20 | Deleting a Post or a User deletes its likes | `TASK-008` | done |
+| T-21 | `GET /posts` and `GET /users`: 20 rows by default; `limit` / `offset` pages do not overlap; a wrong value → `422` | `TASK-009` | done |
+| T-22 | `search` finds the text in `title` or `content`, in any case; `%` is a plain character | `TASK-009` | done |
+| T-23 | `created_after` / `created_before` filter by `created_at`; a wrong date → `422` | `TASK-009` | done |
+| T-24 | `min_likes` returns Posts with that many likes or more; a wrong value → `422` | `TASK-009` | done |
+| T-25 | All parameters work together, and `GET /posts` is still one query | `TASK-009` | done |
 
 ## How to Write Tests
 

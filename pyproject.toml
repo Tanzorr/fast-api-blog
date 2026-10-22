@@ -10,6 +10,11 @@ target-version = "py312"
 # UP: modern Python syntax · B: common bugs
 select = ["E", "W", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.isort]
+# The alembic/ folder has the same name as the package. Without this, ruff
+# sorts `from alembic import op` as our own code.
+known-third-party = ["alembic"]
+
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI uses Depends() as a default value on purpose.
 extend-immutable-calls = ["fastapi.Depends"]

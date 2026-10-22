@@ -10,6 +10,7 @@
 | Pydantic | 2.14 | Schemas: checks request data, shapes responses |
 | pydantic-settings | 2.16 | Reads settings from env variables and `.env` (ADR-003) |
 | SQLAlchemy | 2.1 | ORM: models, sessions, queries (ADR-004) |
+| Alembic | 1.20 | Database migrations (ADR-005) |
 | psycopg | 3.3 | Lets Python talk to PostgreSQL |
 | pwdlib + argon2-cffi | 0.3 / 25.1 | Password hashing with Argon2 (ADR-006) |
 | PyJWT | 2.15 | Makes and checks access tokens (ADR-010) |
@@ -17,8 +18,6 @@
 | Docker Compose | v2 | Runs the database on your computer |
 | pytest | 9.1 | Runs the tests in `tests/` ([`testing.md`](testing.md)) |
 | ruff | 0.17 | Linter and formatter; rules in `pyproject.toml` |
-
-Not installed yet: Alembic (`TASK-005`).
 
 The packages are listed in [`../../requirements.txt`](../../requirements.txt),
 **without exact versions** (ADR-002). The versions above are what `venv1` has
@@ -54,12 +53,24 @@ cp .env.example .env                       # first time only, then edit it
 docker compose up -d                       # start the database
 python3 -m venv venv1                      # first time only
 venv1/bin/pip install -r requirements.txt  # first time, and after requirements change
+venv1/bin/alembic upgrade head             # create or update the tables
 venv1/bin/fastapi dev main.py              # start the API with auto-restart
 venv1/bin/pytest                           # run the tests (the database must run)
 venv1/bin/ruff check .                     # find code problems
 venv1/bin/ruff format .                    # format the code
 docker compose logs -f db
 docker compose exec db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"  # SQL prompt
+```
+
+Migrations (Alembic, ADR-005):
+
+```bash
+venv1/bin/alembic revision --autogenerate -m "add likes"  # after a model change; read the new file!
+venv1/bin/alembic upgrade head             # run all new migrations
+venv1/bin/alembic downgrade -1             # undo the last migration
+venv1/bin/alembic current                  # which migration the database is at
+venv1/bin/alembic check                    # fails if a model change has no migration
+venv1/bin/alembic stamp head               # mark an existing database as up to date, without changing it
 ```
 
 | URL | What |

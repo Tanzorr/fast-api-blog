@@ -114,8 +114,9 @@ venv1/bin/ruff format --check .
 
 ## 6. WHERE WE ARE NOW
 
-`TASK-001` – `TASK-004` and `TASK-006` are finished: FastAPI with PostgreSQL
-in Docker, CRUD for Posts and Users, Argon2 passwords, `APIRouter`s, pytest +
-ruff, and login with JWT access tokens (only the User can change their own
-account). **There are no migrations yet, and Posts are not protected.** The next
-ticket is `TASK-005` (Alembic).
+`TASK-001` – `TASK-006`, `TASK-008` and `TASK-009` are finished: FastAPI with
+PostgreSQL in Docker, CRUD for Posts and Users, Argon2 passwords,
+`APIRouter`s, pytest + ruff, login with JWT access tokens (only the User can
+change their own account), Alembic migrations, Likes (many-to-many User ↔
+Post), and pagination, search and filters on the lists. **Posts
+have no author and are not protected.** The next ticket is `TASK-007`.

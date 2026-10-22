@@ -1,6 +1,20 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+
+class Pagination(BaseModel):
+    limit: int
+    offset: int
+
+
+class PostFilters(BaseModel):
+    """Query parameters of `GET /posts`. Every filter is optional."""
+
+    search: str | None = None
+    created_after: datetime | None = None
+    created_before: datetime | None = None
+    min_likes: int | None = Field(default=None, ge=0)
 
 
 class Post(BaseModel):
@@ -13,6 +27,7 @@ class PostOut(Post):
 
     id: int
     created_at: datetime
+    likes_count: int
 
 
 class User(BaseModel):
